@@ -1,0 +1,55 @@
+create a RG, Vnet and subnet and then execute the below command:
+
+
+$scriptUrlBase = 'https://raw.githubusercontent.com/Microsoft/sql-server-samples/master/samples/manage/azure-sql-db-managed-instance/delegate-subnet'
+
+$parameters = @{
+    subscriptionId = '227543ae-2869-4aec-8298-158741cf2625'
+    resourceGroupName = 'RG2'
+    virtualNetworkName = 'azsqlmivn'
+    subnetName = 'azsqlmisn'
+    }
+
+Invoke-Command -ScriptBlock ([Scriptblock]::Create((iwr ($scriptUrlBase+'/delegateSubnet.ps1?t='+ [DateTime]::Now.Ticks)).Content)) -ArgumentList $parameters
+
+Note: choose the vnet and also public endpoint
+Now go to the Managed instance : NSG --> Open the following inbound ports-->1433 and 1434 , 3342, 3389
+
+Go to Networking--> Enable public endpoint, Connection type- Redirect
+Copy the endpoint along with the port number
+SSMS--> paste the endpoint address:
+Create a db
+Create database DemoDB Collate SQL_LATIN1_General_CPI_CI_AS
+
+
+Restore database from a source db using storage containers(*.bak) ,local drive (*.bak)(if exists) Or 
+bacpac files on a container/ by Import export method 
+
+For importing database using bacpac 
+Right click on Databases-->Import Datatier Application--> Import from windows azure: Enter storage account(connect) , container , filename
+You can also create a copy on your local machine 
+click next
+provide db name 
+Click next and Finish
+This creates a db on target.
+
+
+
+To restore db from container :
+
+Upload the backup file to container or use tsql command
+Right click db--restore db--device--url--Add
+Azure Storage Container--Add
+Once you add the container and select the database backup 
+Shared access Signature-- Click create credential --> copy the SAS key
+Click ok
+Click ok again and the backup will be successful
+
+
+Import database 
+Create an empty db at the destination donot create any schema or else it throws validation error on not null columns
+
+
+
+Note : create all resources under the same RG
+
